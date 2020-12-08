@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then
+  echo "ターゲット名を指定してください" 1>&2
+  exit 1
+fi
+
+cargo run --bin $1
