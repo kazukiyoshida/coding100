@@ -8,22 +8,44 @@ use proconio::marker::Chars;
 use std::cmp;
 use std::collections::HashSet;
 
+fn main() {
+    input! {
+        m: usize,
+        n: usize,
+        map: [[u32; m]; n],
+    }
+
+    G {
+        m,
+        n,
+        map,
+        r0: (0, 0),
+        l: 0,
+        // result = rsl
+        rsl: vec![],
+    }
+    .main()
+}
+
+// G と input! は近くにあった方が見やすい
 struct G {
-    m: isize, // y
-    n: isize, // x
+    m: usize, // y
+    n: usize, // x
     map: Vec<Vec<u32>>,
-    start: (usize, usize), // (x,y)
-    len: u32,
-    result: Vec<u32>,
+    r0: (usize, usize), // (x,y)
+    l: u32,
+    rsl: Vec<u32>,
 }
 
 impl G {
-    fn dfs(&mut self, r: (usize, usize), memo: Vec<Vec<Option<u32>>>, len: u32) {
+    // stack に積みたいものは引数として渡す
+    fn dfs(&mut self, r: (usize, usize), memo: Vec<Vec<Option<u32>>>, l: u32) {
         // validation
         if self.map[r.0][r.1] == 0 {
             return;
         }
 
+        // 四則演算の時だけ isize にキャストする
         let ns = vec![
             (r.0 as isize + 0, r.1 as isize + 1),
             (r.0 as isize + 1, r.1 as isize + 0),
@@ -32,27 +54,27 @@ impl G {
         ];
 
         for n in ns {
-            if 0 <= n.0 && n.0 < self.n && 0 <= n.1 && n.1 < self.m {
+            // 配列の区間に入っていると判定できたら usize にキャストしなおす
+            if 0 <= n.0 && n.0 < self.n as isize && 0 <= n.1 && n.1 < self.m as isize {
                 let x = n.0 as usize;
                 let y = n.1 as usize;
 
                 if self.map[x][y] == 1 && memo[x][y] == None {
-                    let mut cloned_memo = memo.clone();
-                    cloned_memo[x][y] = Some(len + 1);
-                    self.dfs((x, y), cloned_memo, len + 1);
+                    let mut memo_ = memo.clone();
+                    memo_[x][y] = Some(l + 1);
+                    self.dfs((x, y), memo_, l + 1);
                 }
             }
         }
 
         let l = memo
-            .clone()
             .into_iter()
             .flatten()
             .filter(|m| m.is_some())
             .map(|m| m.unwrap())
             .max()
             .unwrap();
-        self.result.push(l);
+        self.rsl.push(l);
     }
 
     fn main(&mut self) {
@@ -61,33 +83,12 @@ impl G {
                 println!("------------");
                 println!("{:?}", (x, y));
 
-                self.start = (x as usize, y as usize);
-                let mut memo = vec![vec![None; self.m as usize]; self.n as usize];
-                memo[self.start.0][self.start.1] = Some(0);
-                self.dfs(self.start, memo, 0);
+                self.r0 = (x, y);
+                let mut memo = vec![vec![None; self.m]; self.n];
+                memo[self.r0.0][self.r0.1] = Some(0);
+                self.dfs(self.r0, memo, 0);
             }
         }
-        println!(
-            "######## result = {:?}",
-            self.result.clone().into_iter().max()
-        );
+        println!("rsl = {:?}", self.rsl.clone().into_iter().max());
     }
-}
-
-fn main() {
-    input! {
-        m: isize,
-        n: isize,
-        map: [[u32; m]; n],
-    }
-
-    G {
-        m,
-        n,
-        map,
-        start: (0, 0),
-        len: 0,
-        result: vec![],
-    }
-    .main()
 }
