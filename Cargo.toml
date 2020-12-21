@@ -75,3 +75,11 @@ path = "src/dp002.rs"
 [[bin]]
 name = "dp003"
 path = "src/dp003.rs"
+
+[[bin]]
+name = "dp004"
+path = "src/dp004.rs"
+
+[[bin]]
+name = "dp005"
+path = "src/dp005.rs"
